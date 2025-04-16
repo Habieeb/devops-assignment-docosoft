@@ -17,4 +17,4 @@ FROM mcr.microsoft.com/dotnet/aspnet:8.0
 WORKDIR /app
 COPY --from=build /out .
 
-ENTRYPOINT ["dotnet", "CounterApi.dll"]
+ENTRYPOINT ["dotnet", "CounterApi.dll"]    #trrtr
