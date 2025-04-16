@@ -1,22 +1,21 @@
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+# Use the official .NET SDK image for building the app
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+WORKDIR /app
 
-      - name: Extract version info
-        id: vars
-        run: |
-          echo "SHA_TAG=${GITHUB_SHA::7}" >> $GITHUB_ENV
-          echo "BRANCH_TAG=${GITHUB_REF##*/}" >> $GITHUB_ENV
+# Copy csproj and restore dependencies
+COPY *.sln .
+COPY src/CounterAPI/*.csproj ./src/CounterAPI/
+RUN dotnet restore
 
-      - name: Build and push Docker image
-        uses: docker/build-push-action@v2
-        with:
-          context: .
-          push: true
-          tags: |
-            yourdockerhubusername/your-image-name:${{ env.SHA_TAG }}
-            yourdockerhubusername/your-image-name:${{ env.BRANCH_TAG }}
-            yourdockerhubusername/your-image-name:latest
+# Copy everything else and build the app
+COPY . .
+WORKDIR /app/src/CounterAPI
+RUN dotnet publish -c Release -o /out
+
+# Build runtime image
+FROM mcr.microsoft.com/dotnet/aspnet:8.0
+WORKDIR /app
+COPY --from=build /out .
+
+# This is the important part:
+ENTRYPOINT ["dotnet", "CounterApi.dll"]
