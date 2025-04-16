@@ -13,8 +13,8 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v2
 
-    - name: List repository files for debugging
-      run: ls -alh  # Verifies that Dockerfile is in the root directory
+    - name: List files in repo for debugging
+      run: ls -alh  # Verifies that the file structure is correct
 
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v1
@@ -29,6 +29,6 @@ jobs:
       uses: docker/build-push-action@v2
       with:
         context: .
-        file: ./Dockerfile  # Ensure the Dockerfile path is correct
+        file: ./Dockerfile
         push: true
         tags: ${{ secrets.DOCKER_USERNAME }}/counterapi:latest
