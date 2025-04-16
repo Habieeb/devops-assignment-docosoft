@@ -9,7 +9,7 @@ WORKDIR /src
 
 # Copy the solution and the csproj file(s)
 COPY *.sln ./
-COPY src/CounterApi/*.csproj ./src/CounterApi/
+COPY src/CounterApi.csproj ./src/
 
 # Restore dependencies
 RUN dotnet restore
