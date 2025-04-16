@@ -5,7 +5,7 @@ WORKDIR /app
 
 # Copy solution and project files
 COPY CounterApi.sln ./
-COPY src/CounterApi.csproj ./src/
+COPY src/CounterApi/CounterApi.csproj ./src/
 
 # Restore dependencies
 RUN dotnet restore
