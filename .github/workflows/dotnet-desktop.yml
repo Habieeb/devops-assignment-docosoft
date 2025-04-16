@@ -41,4 +41,4 @@ jobs:
         context: .  # Ensure context is the root of the repo
         file: ./Dockerfile  # Correct path to the Dockerfile
         push: true  # Push the image
-        tags: ${{ secrets.DOCKER_USERNAME }}/CounterApi:latest
+        tags: ${{ secrets.DOCKER_USERNAME }}/counterapi:latest
