@@ -10,7 +10,7 @@ COPY src/CounterApi.csproj ./src/
 # Restore dependencies
 RUN dotnet restore
 
-# Copy the full source code
+# Copy everything else
 COPY src/ ./src/
 
 # Build the project
@@ -22,11 +22,11 @@ FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
 
 WORKDIR /app
 
-# Copy built app from build stage
+# Copy published build from the previous stage
 COPY --from=build /app/build ./
 
-# Expose port (optional, if running inside a container)
+# Expose port
 EXPOSE 80
 
-# Start the application
+# Start the app
 ENTRYPOINT ["dotnet", "CounterApi.dll"]
