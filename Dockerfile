@@ -1,32 +1,31 @@
-# Stage 1 - Build
+# Use the official image as the base
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 
+# Set the working directory inside the container
 WORKDIR /app
 
-# Copy solution and project files
+# Copy the solution file and the src folder to the container
 COPY CounterApi.sln ./
-COPY src/CounterApi.csproj ./src/
+COPY src ./src
+COPY tests ./tests
 
-# Restore dependencies
+# Restore the dependencies
 RUN dotnet restore
 
-# Copy everything else
-COPY src/ ./src/
+# Build the solution
+RUN dotnet build CounterApi.sln -c Release --no-restore
 
-# Build the project
-WORKDIR /app/src
-RUN dotnet build -c Release -o /app/build
+# Publish the application
+RUN dotnet publish CounterApi.sln -c Release -o /app/publish --no-build
 
-# Stage 2 - Publish
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
+# Set the base image for the runtime environment
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
 
+# Set the working directory
 WORKDIR /app
 
-# Copy published build from the previous stage
-COPY --from=build /app/build ./
+# Copy the published files from the build stage
+COPY --from=build /app/publish .
 
-# Expose port
-EXPOSE 80
-
-# Start the app
-ENTRYPOINT ["dotnet", "CounterApi.dll"]
+# Set the entry point for the application
+ENTRYPOINT ["dotnet", "src/CounterApi.dll"]
