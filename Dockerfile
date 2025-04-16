@@ -1,20 +1,29 @@
-# Use the official .NET SDK image for building the app
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+# Use the official .NET image as the base image
+FROM mcr.microsoft.com/dotnet/aspnet:6.0 AS base
 WORKDIR /app
+EXPOSE 80
 
-# Copy csproj and restore dependencies
-COPY *.sln .
-COPY src/CounterAPI/*.csproj ./src/CounterAPI/
+# Use the SDK image for building the application
+FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
+WORKDIR /src
+
+# Copy the solution and the csproj file(s)
+COPY *.sln ./
+COPY src/CounterApi/*.csproj ./src/CounterApi/
+
+# Restore dependencies
 RUN dotnet restore
 
-# Copy everything else and build the app
+# Copy all other files
 COPY . .
-WORKDIR /app/src/CounterAPI
-RUN dotnet publish -c Release -o /out
 
-# Build runtime image
-FROM mcr.microsoft.com/dotnet/aspnet:8.0
+WORKDIR /src
+RUN dotnet build CounterApi.sln -c Release -o /app/build
+
+FROM build AS publish
+RUN dotnet publish CounterApi.sln -c Release -o /app/publish
+
+FROM base AS final
 WORKDIR /app
-COPY --from=build /out .
-
-ENTRYPOINT ["dotnet", "CounterApi.dll"]    #trrtr
+COPY --from=publish /app/publish .
+ENTRYPOINT ["dotnet", "CounterAPI.dll"]
