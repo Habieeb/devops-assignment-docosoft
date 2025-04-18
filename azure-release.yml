@@ -1,0 +1,42 @@
+trigger:
+  branches:
+    include:
+      - main
+
+# This pipeline runs after azure-build.yml publishes an artifact
+stages:
+  - stage: Deploy
+    displayName: Deploy Stage
+    jobs:
+      - job: DeployJob
+        displayName: Deploy Docker Image
+        pool:
+          vmImage: ubuntu-latest
+
+        steps:
+          - checkout: self
+
+          - task: DownloadPipelineArtifact@2
+            inputs:
+              buildType: 'specific'
+              project: '<YourProjectName>'
+              definition: '<CI_Pipeline_Definition_ID>'
+              buildVersionToDownload: 'latest'
+              targetPath: '$(Pipeline.Workspace)/drop'
+
+          - task: DockerInstaller@0
+            displayName: 'Install Docker'
+
+          - script: |
+              docker build --no-cache -t $(DOCKER_USERNAME)/counterapi:latest .
+            displayName: 'Build Docker Image'
+
+          - task: Docker@2
+            displayName: 'Push Docker Image to Docker Hub'
+            inputs:
+              command: push
+              containerRegistry: 'DockerHubServiceConnection' # Azure DevOps Service Connection
+              repository: 'counterapi'
+              tags: |
+                latest
+
